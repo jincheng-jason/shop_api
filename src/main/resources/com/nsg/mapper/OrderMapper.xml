@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.OrderMapper">
+
+    <resultMap id="ordersMap" type="Order">
+        <id property="orderId" column="order_id"/>
+        <result property="orderSN" column="order_sn"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="addressId" column="address_id"/>
+        <result property="type" column="type"/>
+        <result property="goodsPrice" column="goods_price"/>
+        <result property="postage" column="postage"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="createTime" column="create_time"/>
+        <result property="description" column="description"/>
+        <result property="payType" column="pay_type"/>
+        <result property="overdueTime" column="overdue_time"/>
+        <result property="receivedTime" column="received_time"/>
+        <result property="overdueMessageStatus" column="overdue_message_status"/>
+    </resultMap>
+
+    <resultMap id="orderResult" type="Order">
+        <id column="order_id" property="orderId" jdbcType="BIGINT"/>
+        <result column="order_sn" property="orderSN" jdbcType="VARCHAR"/>
+        <result column="shop_id" property="shopId" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="goods_price" property="goodsPrice" jdbcType="INTEGER"/>
+        <result column="total_price" property="totalPrice" jdbcType="INTEGER"/>
+        <result column="postage" property="postage" jdbcType="INTEGER"/>
+        <result property="description" column="description"/>
+        <result column="create_time" property="createTime" jdbcType="BIGINT"/>
+        <result column="overdue_time" property="overdueTime" jdbcType="BIGINT"/>
+        <association property="address" javaType="address">
+            <id column="address_id" property="addressId" jdbcType="BIGINT"/>
+            <result column="addressee" property="addressee" jdbcType="VARCHAR"/>
+            <result column="province" property="province" jdbcType="VARCHAR"/>
+            <result column="city" property="city" jdbcType="VARCHAR"/>
+            <result column="area" property="area" jdbcType="VARCHAR"/>
+            <result column="direction" property="direction" jdbcType="VARCHAR"/>
+            <result column="phone_num" property="phoneNum" jdbcType="VARCHAR"/>
+            <result column="is_default" property="isDefault" jdbcType="TINYINT"/>
+            <result column="create_time" property="createTime" jdbcType="BIGINT"/>
+        </association>
+        <collection property="goodsArray" ofType="orderItem">
+            <id column="order_item_id" property="orderItemId" jdbcType="BIGINT"/>
+            <result column="sub_order_id" property="subOrderId" jdbcType="BIGINT"/>
+            <result column="sku_id" property="skuId" jdbcType="BIGINT"/>
+            <result column="buy_num" property="buyNum" jdbcType="INTEGER"/>
+            <result column="sales_price" property="salesPrice" jdbcType="INTEGER"/>
+            <result column="item_type" property="itemType" jdbcType="VARCHAR"/>
+            <result column="order_item_is_virtual" property="isVirtual" jdbcType="TINYINT"/>
+            <association property="goods" javaType="Goods">
+                <id column="goods_id" property="goodsId" jdbcType="BIGINT"/>
+                <result column="product_id" property="goodsName" jdbcType="BIGINT"/>
+                <result column="shop_id" property="shopId" jdbcType="BIGINT"/>
+                <result column="goods_name" property="goodsName" jdbcType="VARCHAR"/>
+                <result column="goods_intro" property="goodsIntro" jdbcType="VARCHAR"/>
+                <result column="main_pic_url" property="mainPicUrl" jdbcType="VARCHAR"/>
+                <result column="info_url" property="infoUrl" jdbcType="VARCHAR"/>
+                <!--<result column="show_price" property="showPrice" jdbcType="INTEGER"/>-->
+                <!--<result column="sales_price" property="salesPrice" jdbcType="INTEGER"/>-->
+                <result column="goods_show" property="goodsShow" jdbcType="INTEGER"/>
+                <result column="goods_click" property="goodsClick" jdbcType="INTEGER"/>
+                <result column="goods_state" property="goodsState" jdbcType="INTEGER"/>
+                <result column="goods_commend" property="goodsCommend" jdbcType="INTEGER"/>
+                <result column="sale_num" property="saleNum" jdbcType="INTEGER"/>
+                <result column="store_num" property="storeNum" jdbcType="INTEGER"/>
+                <result column="is_virtual" property="isVirtual" jdbcType="TINYINT"/>
+                <collection property="skuAttrs" ofType="SkuAttr">
+                    <result column="attr_name" property="attrName" jdbcType="VARCHAR"/>
+                    <result column="attr_value" property="attrValue" jdbcType="VARCHAR"/>
+                </collection>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="getById" parameterType="Long" resultMap="ordersMap">
+        select * from `order` where order_id = #{orderId}
+    </select>
+
+    <select id="getByOrderSN" parameterType="String" resultMap="ordersMap">
+        select * from `order` where order_sn = #{orderSN}
+    </select>
+
+    <select id="getOrdersByType" parameterType="String" resultMap="ordersMap" resultType="List">
+        select * from `order` where type = #{orderType}
+    </select>
+
+    <select id="findAll" parameterType="java.util.Map" resultMap="orderResult" resultType="List">
+        select t9.*,a5.product_img as main_pic_url, a5.attr_name, a5.attr_value from
+        (SELECT t7.*,t8.product_id,t8.goods_intro,
+        -- t8.main_pic_url,
+        t8.info_url,
+        -- t8.show_price, t8.sales_price as goods_sales_price,
+        t8.goods_show, t8.goods_click,
+        t8.goods_state, t8.goods_commend, t8.sale_num, t8.store_num, t8.is_virtual
+        FROM
+        (SELECT t5.*, t6.order_item_id , t6.sku_id,
+        t6.goods_id ,t6.goods_name ,t6.buy_num ,t6.sales_price,t6.item_type,t6.is_virtual as order_item_is_virtual FROM
+        (SELECT t3.*, t4.sub_order_id FROM
+        (SELECT t1.order_id, t1.order_sn, t1.shop_id,t1.user_id,t1.address_id,
+        t1.create_time, t1.type, t1.goods_price,t1.postage,t1.total_price,t1.description,t1.overdue_time,
+        t2.addressee,t2.province,t2.city,t2.area,t2.direction,t2.phone_num,t2.is_default
+        FROM `order` t1 LEFT JOIN address t2 on t1.address_id = t2.address_id
+        WHERE t1.type &lt;&gt; 'deleted'
+        <if test="user_id != null">
+            AND t1.user_id = #{user_id}
+        </if>
+        <if test="type != null">
+            AND t1.type = #{type}
+        </if>
+        <if test="timestamp != null">
+            AND t1.create_time &lt; #{timestamp}
+        </if>
+        <if test="shopId != null">
+            AND t1.shop_id = #{shopId}
+        </if>
+        <if test="order_id != null">
+            AND t1.order_id = #{order_id}
+        </if>
+        order by t1.create_time desc
+        LIMIT 10
+        ) t3
+        LEFT JOIN sub_order t4 ON t3.order_id = t4.order_id) t5
+        LEFT JOIN order_item t6 ON t5.sub_order_id = t6.sub_order_id) t7
+        LEFT JOIN goods t8 ON t7.goods_id = t8.goods_id) t9
+        LEFT JOIN
+        (select a3.*,a4.attr_name,a4.attr_value from
+        (select a1.*,a2.product_attr_id from
+        (select * from product_sku) a1 LEFT JOIN products_ref_attr a2 ON a1.product_sku_id = a2.product_sku_id ) a3
+        LEFT JOIN product_attr a4 ON a3.product_attr_id=a4.products_attr_id) a5
+        ON t9.sku_id = a5.product_sku_id
+        order by t9.create_time desc
+    </select>
+
+
+    <select id="getItemTypes" parameterType="Long" resultType="String">
+        select a.item_type from order_item a inner join sub_order b on a.sub_order_id = b.sub_order_id
+        inner join `order` c on b.order_id = c.order_id
+        where c.order_id = #{orderId}
+    </select>
+
+    <select id="getSkuStore" parameterType="Long" resultType="Integer">
+        select store_num from product_sku where product_sku_id = #{skuId}
+    </select>
+
+    <select id="getShippingCode" parameterType="Long" resultType="String">
+        select shipping_code from sub_order where order_id = #{orderId} limit 1
+    </select>
+
+
+    <insert id="save" parameterType="Order" useGeneratedKeys="true" keyProperty="orderId">
+        insert into `order` (
+          order_sn,
+          shop_id,
+          user_id,
+          address_id,
+          `type`,
+          goods_price,
+          postage,
+          total_price,
+        create_time,
+        description,
+        overdue_time,
+        user_id_uuid
+        )values(
+          #{orderSN},
+          #{shopId},
+          #{userId},
+          #{addressId},
+          #{type},
+          #{goodsPrice},
+          #{postage},
+          #{totalPrice},
+        #{createTime},
+        #{description},
+        #{overdueTime},
+        #{uuidUserId}
+        )
+    </insert>
+
+    <insert id="saveSub" parameterType="SubOrder" useGeneratedKeys="true" keyProperty="subOrderId">
+        insert into `sub_order` (
+        order_id,
+        payment_id,
+        payment_name,
+        payment_code,
+        payment_time,
+        pay_message,
+        sub_order_state,
+        shipping_time,
+        shipping_code,
+        finished_time,
+        invoice,
+        sub_goods_price,
+        sub_postage,
+        sub_total_price,
+        create_time
+        )values(
+        #{orderId},
+        #{paymentId},
+        #{paymentName},
+        #{paymentCode},
+        #{paymentTime},
+        #{payMessage},
+        #{subOrderState},
+        #{shippingTime},
+        #{shippingCode},
+        #{finishedTime},
+        #{invoice},
+        #{subGoodsPrice},
+        #{subPostage},
+        #{subTotalPrice},
+        #{createTime}
+        )
+    </insert>
+
+
+    <update id="changeOrderItemType" parameterType="java.util.Map">
+        update order_item set item_type = #{itemType} where sub_order_id in
+        (select sub_order_id from sub_order where order_id = #{orderId})
+        and sku_id = #{skuId}
+    </update>
+
+    <update id="updateMessageStatus" parameterType="Long">
+        update `order` set overdue_message_status = 1 where order_id = #{orderId}
+    </update>
+
+    <update id="emptyPayType" parameterType="Long">
+        update `order` set pay_type = null where order_id = #{orderId}
+    </update>
+
+    <update id="changeOrderType" parameterType="java.util.Map">
+        update `order` set type = #{type}
+        <if test="payType != null">
+            ,pay_type = #{payType}
+        </if>
+        <if test="receivedTime != null">
+            ,received_time = #{receivedTime}
+        </if>
+        where order_id = #{orderId}
+    </update>
+
+    <update id="reduceStore" parameterType="java.util.Map">
+        update product_sku set store_num = store_num - #{buyNum}
+        where product_sku_id = #{skuId}
+    </update>
+
+    <update id="increaseStore" parameterType="java.util.Map">
+        update product_sku set store_num = store_num + #{buyNum}
+        where product_sku_id = #{skuId}
+    </update>
+
+    <!--<update id="increaseStoreByOrderId" parameterType="java.util.Map">-->
+    <!--update product_sku set store_num = store_num + #{buyNum}-->
+    <!--where product_sku_id = #{skuId}-->
+    <!--</update>-->
+
+    <update id="increaseSalesNum" parameterType="java.util.Map">
+        update product_sku set sales_num = sales_num + #{buyNum}
+        where product_sku_id = #{skuId}
+    </update>
+
+    <update id="reduceSalesNum" parameterType="java.util.Map">
+        update product_sku set sales_num = sales_num - #{buyNum}
+        where product_sku_id = #{skuId}
+    </update>
+
+    <update id="updateOrderBySN" parameterType="Payment">
+        update `order` set
+        payment_id = #{paymentId},
+        payment_status = #{paymentStatus},
+        payment_price = #{paymentPrice},
+        payment_time = #{paymentTime},
+        type = 'unship',
+        pay_type = #{payType}
+        where
+        order_sn = #{orderSN}
+    </update>
+
+    <!--<insert id="saveOrderItem" parameterType="OrderItem" useGeneratedKeys="true" keyProperty="cartItemId">-->
+    <!--insert into cart_item(-->
+    <!--cart_id,-->
+    <!--sku_id,-->
+    <!--buy_num-->
+    <!--)values(-->
+    <!--#{cartId},-->
+    <!--#{skuId},-->
+    <!--#{buyNum}-->
+    <!--)-->
+    <!--</insert>-->
+
+
+</mapper>

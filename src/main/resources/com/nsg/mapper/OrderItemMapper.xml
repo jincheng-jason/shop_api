@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.OrderItemMapper">
+
+    <resultMap id="orderItemMap" type="OrderItem">
+        <id property="orderItemId" column="order_item_id"/>
+        <result property="subOrderId" column="sub_order_id"/>
+        <result property="skuId" column="sku_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="salesPrice" column="sales_price"/>
+        <result property="createTime" column="create_time"/>
+        <result property="buyNum" column="buy_num"/>
+        <result property="itemType" column="item_type"/>
+        <result property="isVirtual" column="is_virtual"/>
+    </resultMap>
+
+    <select id="getOrderItemsByOrderId" parameterType="Long" resultMap="orderItemMap" resultType="List">
+        select a.* from order_item a
+        inner join sub_order b on b.sub_order_id = a.sub_order_id
+        where b.order_id = #{orderId}
+    </select>
+
+    <select id="getOrderItemsByOrderSn" parameterType="String" resultMap="orderItemMap" resultType="List">
+        select a.* from order_item a
+        inner join sub_order b on b.sub_order_id = a.sub_order_id
+        where b.order_sn = #{orderSN}
+    </select>
+
+    <insert id="batchSave" parameterType="List">
+        insert into order_item(
+        sub_order_id,
+        sku_id,
+        goods_id,
+        goods_name,
+        sales_price,
+        create_time,
+        is_virtual,
+        item_type,
+        buy_num
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.subOrderId},
+            #{item.skuId},
+            #{item.goodsId},
+            #{item.goodsName},
+            #{item.salesPrice},
+            #{item.createTime},
+            #{item.isVirtual},
+            #{item.itemType},
+            #{item.buyNum}
+            )
+        </foreach>
+
+    </insert>
+
+    <update id="updateItemType" parameterType="java.util.Map">
+        update order_item set item_type = #{itemType} where order_item_id = #{orderItemId}
+    </update>
+
+</mapper>

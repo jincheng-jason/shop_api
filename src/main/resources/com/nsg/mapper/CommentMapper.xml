@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.CommentMapper">
+
+
+    <resultMap id="commentMap" type="Comment">
+        <id property="commentId" column="comment_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="skuId" column="sku_id"/>
+        <result property="rate" column="rate"/>
+        <result property="content" column="content"/>
+        <result property="purchaseTime" column="purchase_time"/>
+        <result property="commentTime" column="comment_time"/>
+        <result property="userImageUrl" column="user_image_url"/>
+        <result property="userNickName" column="user_nick_name"/>
+        <result property="skuProperty" column="sku_property"/>
+        <result property="createTime" column="create_time"/>
+        <collection property="images" ofType="Image">
+            <id property="imgId" column="img_id"/>
+            <result property="imgTitle" column="img_title"/>
+            <result property="imgIntro" column="img_intro"/>
+            <result property="imgUrl" column="img_url"/>
+            <result property="linkType" column="link_type"/>
+            <result property="linkUrl" column="link_url"/>
+        </collection>
+    </resultMap>
+
+    <select id="getById" parameterType="Long" resultMap="commentMap">
+        select a.*,c.img_id,c.img_intro,c.img_title,c.img_url,c.link_type,c.link_url from `comment` a
+        left join comment_ref_img b on a.comment_id = b.comment_id
+        left join image c on b.img_id = c.img_id
+        where a.comment_id = #{commentId}
+    </select>
+
+    <select id="getCommentsByGoods" parameterType="java.util.Map" resultMap="commentMap" resultType="List">
+        select a.*,c.img_id,
+        c.img_intro,
+        c.img_title,
+        c.img_url,
+        c.link_type,
+        c.link_url from
+        (select * from `comment` where goods_id = #{goodsId} and is_deleted &lt;&gt; 1
+        <if test="timestamp != null">
+            and create_time &lt; #{timestamp}
+        </if>
+        order by create_time DESC limit ${limit}) a
+        left join comment_ref_img b ON a.comment_id = b.comment_id
+        left join image c ON b.img_id = c.img_id
+        order by a.create_time DESC
+    </select>
+
+    <select id="getGoodCommentsByGoods" parameterType="java.util.Map" resultMap="commentMap" resultType="List">
+        select a.*,c.img_id,c.img_intro,c.img_title,c.img_url,c.link_type,c.link_url from `comment` a
+        left join comment_ref_img b on a.comment_id = b.comment_id
+        left join image c on b.img_id = c.img_id
+        where a.goods_id = #{goodsId} and a.is_deleted &lt;&gt; 1
+        and a.rate &gt; 3
+        <if test="timestamp != null">
+            and a.create_time &lt; #{timestamp}
+        </if>
+        order by a.create_time desc
+        limit ${limit}
+    </select>
+
+    <select id="getNormalCommentsByGoods" parameterType="java.util.Map" resultMap="commentMap" resultType="List">
+        select a.*,c.img_id,c.img_intro,c.img_title,c.img_url,c.link_type,c.link_url from `comment` a
+        left join comment_ref_img b on a.comment_id = b.comment_id
+        left join image c on b.img_id = c.img_id
+        where a.goods_id = #{goodsId} and a.is_deleted &lt;&gt; 1
+        and a.rate &gt;= 2
+        and a.rate &lt;= 3
+        <if test="timestamp != null">
+            and a.create_time &lt; #{timestamp}
+        </if>
+        order by a.create_time desc
+        limit ${limit}
+    </select>
+
+    <select id="getBadCommentsByGoods" parameterType="java.util.Map" resultMap="commentMap" resultType="List">
+        select a.*,c.img_id,c.img_intro,c.img_title,c.img_url,c.link_type,c.link_url from `comment` a
+        left join comment_ref_img b on a.comment_id = b.comment_id
+        left join image c on b.img_id = c.img_id
+        where a.goods_id = #{goodsId} and a.is_deleted &lt;&gt; 1
+        and a.rate = 1
+        <if test="timestamp != null">
+            and a.create_time &lt; #{timestamp}
+        </if>
+        order by a.create_time desc
+        limit ${limit}
+    </select>
+
+    <select id="getPicCommentsByGoods" parameterType="java.util.Map" resultMap="commentMap" resultType="List">
+        select a.*,c.img_id,c.img_intro,c.img_title,c.img_url,c.link_type,c.link_url from `comment` a
+        inner join comment_ref_img b on a.comment_id = b.comment_id
+        inner join image c on b.img_id = c.img_id
+        where a.goods_id = #{goodsId} and a.is_deleted &lt;&gt; 1
+        <if test="timestamp != null">
+            and a.create_time &lt; #{timestamp}
+        </if>
+        order by a.create_time desc
+        limit ${limit}
+    </select>
+
+    <select id="getGoodsCommentCounts" parameterType="Long" resultType="Integer">
+        select count(*) as commentNums from `comment` where goods_id = #{goodsId} and is_deleted &lt;&gt; 1
+        union all
+        select count(*) as commentNums from `comment` where goods_id = #{goodsId} and rate &gt; 3 and is_deleted &lt;&gt;
+        1
+        union all
+        select count(*) as commentNums from `comment` where goods_id = #{goodsId} and rate &lt;= 3 and rate &gt;= 2 and
+        is_deleted &lt;&gt; 1
+        union all
+        select count(*) as commentNums from `comment` where goods_id = #{goodsId} and rate = 1 and is_deleted &lt;&gt; 1
+        union all
+        select count(distinct a.comment_id) as commentNums from `comment` a inner join comment_ref_img b on a.comment_id
+        = b.comment_id
+        inner join image c on b.img_id = c.img_id where a.goods_id = #{goodsId} and a.is_deleted &lt;&gt; 1
+    </select>
+
+    <update id="deleteComment" parameterType="Long">
+        update `comment` set is_deleted = 1 where comment_id = #{commentId}
+    </update>
+
+    <insert id="save" parameterType="Comment" useGeneratedKeys="true" keyProperty="commentId">
+        insert into `comment`(
+        user_id,
+        goods_id,
+        sku_id,
+        rate,
+        content,
+        purchase_time,
+        comment_time,
+        user_image_url,
+        user_nick_name,
+        sku_property,
+        create_time
+        )
+        values
+        (
+        #{userId},
+        #{goodsId},
+        #{skuId},
+        #{rate},
+        #{content},
+        #{purchaseTime},
+        #{commentTime},
+        #{userImageUrl},
+        #{userNickName},
+        #{skuProperty},
+        #{createTime}
+        )
+    </insert>
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.AddressMapper">
+
+    <resultMap id="addressMap" type="Address">
+        <id property="addressId" column="address_id"/>
+        <result property="addressee" column="addressee"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="area" column="area"/>
+        <result property="direction" column="direction"/>
+        <result property="phoneNum" column="phone_num"/>
+        <result property="isDefault" column="is_default" javaType="java.lang.Boolean"/>
+        <result property="createTime" column="create_time"/>
+        <result property="userId" column="user_id"/>
+    </resultMap>
+
+
+    <select id="getById" parameterType="Long" resultMap="addressMap" resultType="Address">
+        select * from address where address_id = #{addressId}
+    </select>
+
+    <select id="getByUser" parameterType="Long" resultMap="addressMap" resultType="List">
+        select * from address where user_id = #{userId} and is_deleted &lt;&gt; 1 order by is_default desc,create_time desc
+    </select>
+
+    <select id="getDefault" parameterType="Long" resultMap="addressMap" resultType="Address">
+        select * from address where user_id = #{userId} and is_default = true and is_deleted &lt;&gt; 1 limit 1
+    </select>
+
+    <update id="setAddressDefault" parameterType="java.util.Map">
+        update address set is_default = true where user_id = #{userId} and address_id = #{addressId}
+    </update>
+
+    <update id="setOtherAddressUndefault" parameterType="java.util.Map">
+        update address set is_default = false where user_id = #{userId} and address_id &lt;&gt; #{addressId}
+    </update>
+
+    <delete id="clearAddress" parameterType="Long">
+        delete from address where user_id = #{userId}
+    </delete>
+
+    <insert id="save" parameterType="Address" useGeneratedKeys="true" keyProperty="addressId">
+        insert into address(
+        addressee,
+        province,
+        city,
+        area,
+        direction,
+        phone_num,
+        is_default,
+        create_time,
+        user_id
+        )values(
+        #{addressee},
+        #{province},
+        #{city},
+        #{area},
+        #{direction},
+        #{phoneNum},
+        #{isDefault},
+        #{createTime},
+        #{userId}
+        )
+    </insert>
+
+    <update id="updateAddress" parameterType="Address">
+        update address set
+            addressee = #{addressee},
+            province = #{province},
+            city = #{city},
+            area = #{area},
+            direction = #{direction},
+            phone_num = #{phoneNum}
+        where address_id = #{addressId}
+    </update>
+
+    <update id="deleteAddress" parameterType="Long">
+        update address set is_deleted = 1
+        where address_id = #{addressId}
+    </update>
+
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.SkuAttrMapper">
+
+    <resultMap id="skuAttrMap" type="SkuAttr">
+        <id property="skuAttrId" column="products_attr_id"/>
+        <result property="attrName" column="attr_name"/>
+        <result property="attrValue" column="attr_value"/>
+    </resultMap>
+
+    <select id="getSkuAttrs" parameterType="Long" resultMap="skuAttrMap" resultType="List">
+        select a.* from product_attr a left join products_ref_attr b on a.products_attr_id = b.product_attr_id
+        where b.product_sku_id = #{skuId}
+    </select>
+
+    <select id="getGoodsAttrs" parameterType="Long" resultMap="skuAttrMap" resultType="List">
+        select distinct d.* from goods a
+        inner join products_ref_sku b
+        on a.product_id = b.products_id
+        inner join products_ref_attr c
+        on c.product_sku_id = b.products_sku_id
+        inner join product_attr d
+        on d.products_attr_id = c.product_attr_id
+        where a.goods_id = #{goodsId}
+        order by d.products_attr_id asc
+    </select>
+
+</mapper>

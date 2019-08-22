@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.GoodsMapper">
+
+    <resultMap id="goodsMap" type="Goods">
+        <id property="goodsId" column="goods_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="brandId" column="brand_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsIntro" column="goods_intro"/>
+        <result property="mainPicUrl" column="main_pic_url"/>
+        <result property="infoUrl" column="info_url"/>
+        <result property="showPrice" column="show_price"/>
+        <result property="salesPrice" column="sales_price"/>
+        <result property="goodsShow" column="goods_show"/>
+        <result property="goodsClick" column="goods_click"/>
+        <result property="goodsState" column="goods_state"/>
+        <result property="goodsCommend" column="goods_commend"/>
+        <result property="saleNum" column="sale_num"/>
+        <result property="storeNum" column="store_num"/>
+        <result property="createTime" column="create_time"/>
+        <result property="isVirtual" column="is_virtual"/>
+        <result property="specUrl" column="spec_url"/>
+    </resultMap>
+
+    <resultMap id="imgMap" type="Image">
+        <id property="imgId" column="img_id"/>
+        <result property="imgTitle" column="img_title"/>
+        <result property="imgIntro" column="img_intro"/>
+        <result property="imgUrl" column="img_url"/>
+        <result property="linkType" column="link_type"/>
+        <result property="linkUrl" column="link_url"/>
+    </resultMap>
+
+
+    <select id="getCommendGoodsList" parameterType="java.util.Map" resultMap="goodsMap" resultType="List">
+        select * from goods where goods_commend = 1 and goods_state = 1
+        <if test="shopId != null">
+            and shop_id = #{shopId}
+        </if>
+        <if test="timestamp != null">
+            and create_time &lt; #{timestamp}
+        </if>
+    </select>
+
+    <select id="getById" parameterType="Long" resultMap="goodsMap" resultType="Goods">
+        select * from goods where goods_id = #{goodsId}
+    </select>
+
+    <select id="getGoodsImgs" parameterType="Long" resultMap="imgMap" resultType="List">
+        select a.* from image a inner join goods_ref_img b on a.img_id = b.img_id where b.goods_id = #{goodsId}
+    </select>
+
+    <select id="getGoodsStock" parameterType="Long" resultType="Integer">
+        select sum(c.store_num) from goods a
+        inner join products_ref_sku b
+        on a.product_id = b.products_id
+        inner join product_sku c
+        on c.product_sku_id = b.products_sku_id
+        where a.goods_id = #{goodsId}
+    </select>
+
+    <update id="updateGoodsPrice" parameterType="java.util.Map">
+        update goods set show_price = #{showPrice},sales_price = #{salesPrice} where goods_id = #{goodsId}
+    </update>
+
+    <insert id="saveProduct" parameterType="Products" useGeneratedKeys="true" keyProperty="productId">
+        insert into products(
+        products_bn,
+        products_name,
+        purchase_time,
+        purchase_num
+        )values(
+        #{productBn},
+        #{productName},
+        #{purchaseTime},
+        #{purchaseNum}
+        )
+    </insert>
+
+    <insert id="saveAttr" parameterType="SkuAttr" useGeneratedKeys="true" keyProperty="skuAttrId">
+        insert into product_attr(
+        attr_name,
+        attr_value
+        )values(
+        #{attrName},
+        #{attrValue}
+        )
+    </insert>
+
+    <insert id="saveSku" parameterType="ProductSku" useGeneratedKeys="true" keyProperty="productSkuId">
+        insert into product_sku(
+        product_id,
+        purchase_price,
+        sales_num,
+        store_num,
+        product_img,
+        show_price,
+        sales_price
+        )values(
+        #{productId},
+        #{purchasePrice},
+        #{salesNum},
+        #{storeNum},
+        #{product_img},
+        #{show_price},
+        #{sales_price}
+        )
+    </insert>
+
+    <insert id="saveProductRefSku" parameterType="ProductRefSku" useGeneratedKeys="true" keyProperty="productsRefSkuId">
+        insert into products_ref_sku(
+        products_id,
+        products_sku_id
+        )values(
+        #{productsId},
+        #{productsSkuId}
+        )
+    </insert>
+
+    <insert id="saveProductRefAttr" parameterType="ProductRefAttr" useGeneratedKeys="true"
+            keyProperty="productRefAttrId">
+        insert into products_ref_attr(
+        product_sku_id,
+        product_attr_id
+        )values(
+        #{productSkuId},
+        #{productAttrId}
+        )
+    </insert>
+
+    <insert id="saveProps" parameterType="Props" useGeneratedKeys="true" keyProperty="propsId">
+        insert into props(
+        sn,
+        state,
+        products_id,
+        sku_id,
+        create_time
+        )values(
+        #{sn},
+        #{state},
+        #{productId},
+        #{skuId},
+        #{createTime}
+        )
+    </insert>
+
+    <insert id="saveGoods" parameterType="Goods" useGeneratedKeys="true" keyProperty="goodsId">
+        insert into goods(
+        product_id,
+        shop_id,
+        brand_id,
+        goods_name,
+        goods_intro,
+        main_pic_url,
+        info_url,
+        show_price,
+        sales_price,
+        goods_show,
+        goods_click,
+        goods_state,
+        goods_commend,
+        sale_num,
+        store_num,
+        create_time,
+        is_virtual
+        )values(
+        #{productId},
+        #{shopId},
+        #{brandId},
+        #{goodsName},
+        #{goodsIntro},
+        #{mainPicUrl},
+        #{infoUrl},
+        #{showPrice},
+        #{salesPrice},
+        #{goodsShow},
+        #{goodsClick},
+        #{goodsState},
+        #{goodsCommend},
+        #{saleNum},
+        #{storeNum},
+        #{createTime},
+        #{isVirtual}
+        )
+    </insert>
+
+    <insert id="saveGoodsRefImg" parameterType="GoodsRefImg" useGeneratedKeys="true" keyProperty="goodsRefImgId">
+        insert into goods_ref_img(
+        goods_id,
+        img_id
+        )values(
+        #{goodsId},
+        #{imgId}
+        )
+    </insert>
+
+</mapper>

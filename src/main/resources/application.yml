@@ -1,0 +1,40 @@
+banner:
+  charset: UTF-8
+  location: classpath:banner.txt
+server:
+  port: 8889
+spring:
+  datasource:
+    name: csl_shop
+    url: jdbc:mysql://123.59.61.245:3306/csl_shop?characterEncoding=utf8&characterSetResults=utf8&useSSL=false
+    username: root
+    password: 9Hcom.com
+#    url: jdbc:mysql://120.132.55.103:3309/csl_shop?characterEncoding=utf8&characterSetResults=utf8&useSSL=false
+#    username: shopuser
+#    password: Gx5OTyo2djf#9h
+    # 使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    filters: stat
+    maxActive: 20
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+
+mybatis:
+  mapper-locations: classpath*:com/nsg/mapper/*.xml
+  type-aliases-package: com.nsg.domain
+
+logging:
+    level:
+#       druid.sql: INFO
+       com.nsg: INFO
+#       net.dongliu: WARN

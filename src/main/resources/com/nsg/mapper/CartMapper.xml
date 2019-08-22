@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.CartMapper">
+
+    <resultMap id="cartMap" type="Cart">
+        <id property="cartId" column="cart_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="promotionId" column="promotion_id"/>
+        <collection property="cartItems" ofType="CartItem">
+            <id property="cartItemId" column="cart_item_id"/>
+            <result property="cartId" column="cart_id"/>
+            <result property="skuId" column="sku_id"/>
+            <result property="buyNum" column="buy_num"/>
+            <result property="salesPrice" column="sales_price"/>
+            <result property="goodsId" column="goods_id"/>
+            <result property="state" column="state"/>
+            <association property="goods" javaType="Goods">
+                <id property="goodsId" column="goods_id"/>
+                <result property="productId" column="product_id"/>
+                <result property="shopId" column="shop_id"/>
+                <result property="brandId" column="brand_id"/>
+                <result property="goodsName" column="goods_name"/>
+                <result property="goodsIntro" column="goods_intro"/>
+                <result property="mainPicUrl" column="main_pic_url"/>
+                <result property="infoUrl" column="info_url"/>
+                <result property="goodsShow" column="goods_show"/>
+                <result property="goodsClick" column="goods_click"/>
+                <result property="goodsState" column="goods_state"/>
+                <result property="goodsCommend" column="goods_commend"/>
+                <!--<result property="saleNum" column="sale_num"/>-->
+                <!--<result property="storeNum" column="store_num"/>-->
+                <result property="createTime" column="create_time"/>
+                <result property="isVirtual" column="is_virtual"/>
+                <collection property="skuAttrs" ofType="SkuAttr">
+                    <result column="attr_name" property="attrName" jdbcType="VARCHAR"/>
+                    <result column="attr_value" property="attrValue" jdbcType="VARCHAR"/>
+                </collection>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="getCartByUser" parameterType="java.util.Map" resultMap="cartMap">
+        select a.cart_id,a.promotion_id,a.shop_id,a.user_id,
+        b.cart_item_id,b.cart_id,b.goods_id,b.sku_id,b.buy_num,d.state,d.sales_price,
+        c.goods_id,c.product_id,c.shop_id,c.brand_id,c.goods_name,c.goods_intro,d.product_img as
+        main_pic_url,c.info_url,
+        c.goods_show,c.goods_click,c.goods_state,c.goods_commend,c.is_virtual,f.attr_name,f.attr_value
+         from cart a
+        left join cart_item b on a.cart_id = b.cart_id
+        left join goods c on b.goods_id = c.goods_id
+        left join product_sku d on d.product_sku_id = b.sku_id
+        left join products_ref_attr e on e.product_sku_id = d.product_sku_id
+        left join product_attr f on f.products_attr_id = e.product_attr_id
+        where a.user_id = #{userId} and a.shop_id = #{shopId}
+        order by d.state desc, b.cart_item_id desc
+    </select>
+
+    <insert id="newCartForUser" parameterType="Cart" useGeneratedKeys="true" keyProperty="cartId">
+        insert into cart(
+        user_id,
+        shop_id
+        )
+        values
+        (
+        #{userId},
+        #{shopId}
+        )
+    </insert>
+
+    <select id="cartCount" parameterType="Long" resultType="Integer">
+        select count(*) from cart_item where cart_id = #{cartId}
+    </select>
+
+    <select id="cartCountOfUser" parameterType="java.util.Map" resultType="Integer">
+        select count(*) from cart a inner join cart_item b on a.cart_id = b.cart_id
+        where a.user_id = #{userId} and a.shop_id = #{shopId}
+    </select>
+
+
+</mapper>

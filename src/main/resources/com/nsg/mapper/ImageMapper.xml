@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.ImageMapper">
+
+    <resultMap id="imageMap" type="Image">
+        <id property="imgId" column="img_id"/>
+        <result property="imgTitle" column="img_title"/>
+        <result property="imgIntro" column="img_intro"/>
+        <result property="imgUrl" column="img_url"/>
+        <result property="linkType" column="link_type"/>
+        <result property="linkUrl" column="link_url"/>
+        <!--<result property="createTime" column="create_time"/>-->
+    </resultMap>
+
+    <select id="getCommentImages" parameterType="Long" resultMap="imageMap" resultType="List">
+        select * from image a inner join comment_ref_img b on a.img_id = b.img_id where b.comment_id = #{commentId}
+    </select>
+
+    <select id="getCommendImages" parameterType="java.util.Map" resultMap="imageMap" resultType="List">
+        select * from image where commend = 1
+        <if test="shopId != null">
+            and shop_id = #{shopId}
+        </if>
+        order by `position` asc
+    </select>
+
+    <insert id="save" parameterType="Image" useGeneratedKeys="true" keyProperty="imgId">
+        insert into image(
+        img_title,
+        img_intro,
+        img_url,
+        link_type,
+        link_url
+        )
+        values
+        (
+        #{imgTitle},
+        #{imgIntro},
+        #{imgUrl},
+        #{linkType},
+        #{linkUrl}
+        )
+    </insert>
+
+    <insert id="saveCommentRefImage" parameterType="java.util.Map">
+        insert into comment_ref_img(
+        comment_id,
+        img_id
+        )
+        values
+        <foreach collection="imageIds" item="imageId" index="index" separator=",">
+            (#{commentId},#{imageId})
+        </foreach>
+    </insert>
+
+</mapper>

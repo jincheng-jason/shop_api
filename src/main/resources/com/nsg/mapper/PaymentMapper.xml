@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nsg.mapper.PaymentMapper">
+
+    <resultMap id="paymentMap" type="Payment">
+        <id property="paymentId" column="payment_id"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="orderSN" column="order_sn"/>
+        <result property="paymentPrice" column="payment_price"/>
+        <result property="paymentTime" column="payment_time"/>
+        <result property="payType" column="pay_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="paymentCode" column="payment_code"/>
+        <result property="paymentName" column="payment_name"/>
+        <result property="paymentInfo" column="payment_info"/>
+        <result property="paymentConfig" column="payment_config"/>
+        <result property="paymentSort" column="payment_sort"/>
+    </resultMap>
+
+    <insert id="save" parameterType="Payment" useGeneratedKeys="true" keyProperty="paymentId">
+        insert into payment(
+        shop_id,
+        payment_status,
+        create_time,
+        order_sn,
+        payment_price,
+        payment_time,
+        pay_type
+        )
+        values (
+        #{shopId},
+        #{paymentStatus},
+        ${createTime},
+        #{orderSN},
+        ${paymentPrice},
+        ${paymentTime},
+        #{payType}
+        )
+    </insert>
+
+    <select id="getPayStatus" parameterType="Long" resultType="Payment" resultMap="paymentMap">
+        select payment_id,shop_id,payment_status,order_sn,payment_price,payment_time,create_time,pay_type
+        from `order` where order_id = #{order_id}
+    </select>
+
+</mapper>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta content="telephone=no" name="format-detection"/>
+    <title></title>
+    <style>
+        body, em, p, div, section, s, img {
+            font-size: 16px;
+            font-family: Helvetica;
+            padding: 0;
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .total {
+            padding-bottom: 25%;
+        }
+
+        .s_loop {
+            width: 100%;
+        }
+
+        .s_loop img {
+            width: 100%;
+        }
+
+        .b_line {
+            width: 100%;
+            padding-top: 0.7em;
+            border-bottom: 1px #dddddd solid;
+        }
+
+        .price {
+            width: 96%;
+            padding: 0 2%;
+        }
+
+        .price p {
+            margin: 0.5em 0 0.875em;
+            font-size: 0.875em;
+            color: #000;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .s_line {
+            display: inline-block;
+            font-size: 0.75em;
+            color: #9f9f9f;
+            margin-right: 0.75em;
+        }
+
+        .s_red {
+            display: inline-block;
+            font-style: normal;
+            font-size: 0.875em;
+            color: #d43a25;
+        }
+
+        .size {
+            padding: 0.8em 2% 0;
+            color: #000;
+            font-size: 0.8em;
+        }
+
+        .eval {
+            width: 96%;
+            padding: 0 2%;
+        }
+
+        .eval p {
+            font-size: 0.8em;
+            color: #000;
+        }
+
+        .eval p:nth-child(1) {
+            margin: 0.7em 0 0.875em;
+        }
+
+        .eval span {
+            font-weight: bold;
+            color: #d43a25;
+            margin: 0 0.5em 0 0.3em;
+        }
+
+        .inf_p {
+            width: 96%;
+            padding: 0.8em 2% 0;
+        }
+
+        .inbox {
+            overflow: hidden;
+        }
+
+        .inf_p .stars {
+            float: left;
+        }
+
+        .inf_p .stars img {
+            width: 1em;
+            height: 1em;
+            margin: 0;
+            padding: 0;
+        }
+
+        .inf_p .personal {
+            float: right;
+            font-size: 0.625em;
+            color: #333;
+        }
+
+        .word {
+            font-size: 0.875em;
+            color: #333;
+            margin-top: 0.9em;
+            line-height: 1;
+        }
+
+        .w_con {
+            margin-top: 0.9em;
+        }
+
+        .w_con img {
+            width: 3.969em;
+            margin-right: 0.8em;
+        }
+
+        .top {
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            height: 3.25em;
+            background: #fff;
+        }
+
+        .top img {
+            width: 5em;
+            float: left;
+            display: block;
+            padding: 1% 1% 0 4%;
+        }
+
+        .btn-dl {
+            width: 6em;
+            line-height: 2.4em;
+            background: #d6000f;
+            color: #fff;
+            text-align: center;
+            display: block;
+            float: right;
+            margin: 2% 5% 0 0;
+            border-radius: 0.5em;
+        }
+    </style>
+</head>
+<body>
+<section class="total">
+    <section class="s_loop">
+        <img th:src="${goods.goodsSlide[0].imgUrl}" src="../static/images/s_loop.jpg" alt="" width="750" height="auto"/>
+    </section>
+    <section class="price">
+        <p th:text="${goods.goodsName}">彰显身份，这就是我的主队！</p>
+        <s class="s_line" th:text="${'￥' + goods.showPriceShow}">￥299.00</s><em th:text="${'￥' + goods.salesPriceShow}"
+                                                                                class="s_red">￥2.00</em>
+    </section>
+    <p class="b_line"></p>
+    <section class="size price">规格</section>
+    <p class="b_line"></p>
+    <section class="eval">
+        <p>商品评价</p>
+        <p th:inline="text">好评度<span th:text="${goodPercent}+'%'">99%</span>[[${goods.totalCommentsNum}]]人评价过</p>
+    </section>
+    <p class="b_line"></p>
+
+    <section th:each="comments:${goods.comments}">
+        <section class="inf_p">
+            <div class="inbox">
+                <p class="stars" th:if="${comments.rate == 5}">
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                </p>
+                <p class="stars" th:if="${comments.rate == 4}">
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                </p>
+                <p class="stars" th:if="${comments.rate == 3}">
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                </p>
+                <p class="stars" th:if="${comments.rate == 2}">
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                </p>
+                <p class="stars" th:if="${comments.rate == 1}">
+                    <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/star.png" alt=""/>
+                </p>
+                <p class="personal" th:text="${comments.userNickName + '   ' + comments.commentTime}">京***淘 2016-01-11
+                    16:37:15</p>
+            </div>
+            <div class="word" th:text="${comments.content}">
+
+            </div>
+            <div class="w_con">
+                <img src="images/ping01.jpg" th:each="images:${comments.images}" th:src="${images.imgUrl}" alt=""/>
+            </div>
+        </section>
+        <p class="b_line"></p>
+    </section>
+
+
+    <p class="b_line"></p>
+    <!-- 底部下载条 -->
+    <div class="top">
+        <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/csl.png" alt=""/>
+        <img src="http://7xldo6.com2.z0.glb.qiniucdn.com/txt.png" alt="中超联赛"/>
+        <a href="http://zhongchao.9h-sports.com/welcome.html" class="btn-dl">免费下载</a>
+    </div>
+</section>
+</body>
+</html>
